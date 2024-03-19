@@ -1,0 +1,30 @@
+#airplane {
+    width: 75px;
+    height: 75px;
+    background-color: blue;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.gameOverContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.gameOver {
+    font-size: 10em;
+    text-align: center;
+}
+#score {
+    font-size: 3em;
+    text-align: center;
+    top: 0;
+}
+.gameOverStyle {
+    font-size: 10em;
+    text-align: center;
+}
