@@ -20,36 +20,22 @@ function generateObstaclePosition() {
 }
 
 let obstacleArray = [];
-let container = document.getElementById("container");
-let obstacleID = obstacleArray.length;
+let obstacleContainer = document.getElementById("obstacleContainer");
 
 function createObstacle() {
-    let containerWidth = container.offsetWidth;
+    let obstacleContainerWidth = obstacleContainer.offsetWidth;
     generateObstaclePosition();
-    let startPositionPixels = (startPosition / 100) * containerWidth;
+    let startPositionPixels = (startPosition / 100) * obstacleContainerWidth;
     let obstacle = {
         id: obstacleArray.length,
         element: document.createElement('div'),
     }
-    obstacle.element.setAttribute('class', 'obstacle');
-    obstacle.element.style.height = '75px';
-    obstacle.element.style.width = '75px';
-    obstacle.element.style.backgroundColor = 'red';
-    obstacle.element.style.position = 'absolute';
-    obstacle.element.style.top = '0';
-    obstacle.element.style.transform = 'translateX(-50%)';
-    obstacle.element.textContent = 'Obstacle';
+    obstacle.element.classList.add("obstacle");
     obstacle.element.style.left = startPositionPixels + 'px';
     obstacleArray.push(obstacle);
-    container.appendChild(obstacle.element)
+    obstacleContainer.appendChild(obstacle.element);
     advanceObstacle(obstacle);
 }
-
-let createObstaclesInterval = setInterval(createObstacle, 1000);
-let obstacleVerticalPosition = 0;
-let moveObstacleInterval = setInterval(function() {
-    obstacleArray.forEach(advanceObstacle);
-}, 100);
 
 let obstacleTop = [];
 let bottomEdge = window.innerHeight;
@@ -71,8 +57,8 @@ function advanceObstacle(obstacle) {
 }
 
 function removeObstacle(obstacle) {
-    container.removeChild(obstacle.element);
-        obstacleArray.splice(obstacleArray.indexOf(obstacle), 1);
+    obstacleContainer.removeChild(obstacle.element);
+    obstacleArray.splice(obstacleArray.indexOf(obstacle), 1);
 }
 
 function showScore(score) {
@@ -80,7 +66,7 @@ function showScore(score) {
 }
 
 function collisionCheck(obstacle) {
-    let obstacleLocation = obstacle.element.getBoundingClientRect(); // Get the position of the obstacle
+    let obstacleLocation = obstacle.element.getBoundingClientRect();
     let planeLocation = plane.getBoundingClientRect();
     if (
         obstacleLocation.top < planeLocation.bottom &&
@@ -88,6 +74,71 @@ function collisionCheck(obstacle) {
         obstacleLocation.bottom > planeLocation.top &&
         obstacleLocation.left < planeLocation.right
     ) gameOver();
+}
+
+let projectileArray = [];
+let projectileContainer = document.getElementById("projectileContainer");
+let projectile = null;
+
+
+function createProjectile () {
+    if (pressedKeys['x']) {
+        let planeLocation = plane.getBoundingClientRect();
+        let projectilePosition = planeLocation.left;
+        projectile = {
+            id: projectileArray.length,
+            unit: document.createElement("div"),
+        }
+        projectile.unit.classList.add("projectile");
+        projectile.unit.style.left = projectilePosition + 'px';
+        projectileArray.push(projectile);
+        projectileContainer.appendChild(projectile.unit);
+    
+    }
+    advanceProjectile(projectile);
+}
+
+let projectileBottom = [];
+let topEdge = window.innerHeight;
+
+function advanceProjectile(projectile) {
+    if (projectile !== null) { 
+        let projectileBottomValue = parseInt(projectile.unit.style.bottom) || 0;
+        projectileBottom[projectile.id] = projectileBottomValue;
+        if (topEdge > projectileBottom[projectile.id]) {
+            projectileBottom[projectile.id] += moveInterval;
+            projectile.unit.style.bottom = projectileBottom[projectile.id] + "px";
+            projectile.unit.textContent = projectile.id;
+        } else {
+            removeProjectile(projectile);
+        }
+        hitCheck(projectile);
+    }
+}
+
+function hitCheck(projectile) {
+    if (projectile !== null) { 
+        let projectileLocation = projectile.unit.getBoundingClientRect();
+        obstacleArray.forEach(obstacle => {
+            let obstacleLocation = obstacle.element.getBoundingClientRect();
+            if (
+                projectileLocation.bottom > obstacleLocation.top &&
+                projectileLocation.top < obstacleLocation.bottom &&
+                projectileLocation.right > obstacleLocation.left &&
+                projectileLocation.left < obstacleLocation.right
+           ) {
+                removeProjectile(projectile);
+                removeObstacle(obstacle);
+                ++score;
+                showScore(score);
+            }
+        });
+    }
+}
+
+function removeProjectile(projectile) {
+    projectileContainer.removeChild(projectile.unit);
+    projectileArray.splice(projectileArray.indexOf(projectile), 1);
 }
 
 let message = document.getElementById("gameOver");
@@ -99,11 +150,26 @@ function gameOver() {
     message.classList.add("gameOverStyle");
 }
 
+let createObstaclesInterval = setInterval(createObstacle, 1000); //frecventa cu care sunt create obstacolele
+let moveObstacleInterval = setInterval(function() { // viteza cu care se misca obstacolele
+    obstacleArray.forEach(advanceObstacle);
+}, 100);
+let moveProjectilesInterval = setInterval(function() {
+    projectileArray.forEach(advanceProjectile);
+}, 100);
+
+let keyPressed = {};
+
 document.addEventListener('keydown', (e) => {
     pressedKeys[e.key] = true;
-    setInterval(moveAirPlane(), 1000);
+    setInterval(moveAirPlane, 1000);
+    if (!keyPressed[e.key]) {
+        keyPressed[e.key] = true;
+        createProjectile();        
+    }
 });
 
 document.addEventListener('keyup', (e) => {
     delete pressedKeys[e.key];
+    keyPressed[e.key] = false;
 });
