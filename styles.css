@@ -1,21 +1,33 @@
 #airplane {
-    width: 75px;
-    height: 75px;
-    background-color: blue;
+    width: 0;
+    height: 0;
+    border-left: 37.5px solid transparent;
+    border-right: 37.5px solid transparent;
+    border-bottom: 75px solid blue;
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
 }
-
-.gameOverContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+.obstacle{
+    height: 85px;
+    width: 85px;
+    background: red;
+    position: absolute;
+    top: 0;
 }
-
+.projectile{
+    height: 55px;
+    width: 25px;
+    background: green;
+    position: absolute;
+    bottom: 0;
+}
 .gameOver {
+    font-size: 10em;
+    text-align: center;
+}
+.gameOverStyle {
     font-size: 10em;
     text-align: center;
 }
